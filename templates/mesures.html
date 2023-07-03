@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <div id="chart"></div>
+    <div>
+      <label for="timeSlider" class="form-label" id="timeLabel">heure : 00:00:00</label>
+      <input type="range" class="form-range" step="1" id="timeSlider">
+    </div>
+    <div>
+      <label for="points" class="form-label" id="pointsLabel">points : 0</label>
+      <input type="range" class="form-range" step="1" id="pointsSlider">
+    </div>
+</div>
+<script src="/static/js/main.js"></script>
+{% endblock %}

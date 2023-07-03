@@ -45,6 +45,10 @@ def handle_get_labels():
 def index():
     return render_template('index.html')
 
+@app.route('/mesures')
+def mesures():
+    return render_template('mesures.html')
+
 
 if __name__ == '__main__':
     get_data()
