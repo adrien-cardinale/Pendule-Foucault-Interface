@@ -37,29 +37,20 @@
 
   <div class="container">
     <div id="chart"></div>
-    <div class="range_container">
-      <div class="sliders_control">
-          <input id="fromSlider" type="range"/>
-          <input id="toSlider" type="range"/>
-      </div>
-      <div class="form_control">
-          <div class="form_control_container">
-              <!-- <div class="form_control_container__time">Min</div> -->
-              <!-- <input class="form_control_container__time__input" type="time" id="fromInput" value="00:00:00"/> -->
-              <label class="form_control_container__time__input" for="fromInput"></label>
-          </div>
-          <div class="form_control_container">
-              <!-- <div class="form_control_container__time">Max</div> -->
-              <!-- <input class="form_control_container__time__input" type="time" id="toInput" value="23:59:59"/> -->
-              <label class="to_control_container__time__input" for="fromInput"></label>
-          </div>
-      </div>
+    <div>
+      <label for="timeSlider" class="form-label" id="timeLabel">heure : 00:00:00</label>
+      <input type="range" class="form-range" step="1" id="timeSlider">
+    </div>
+    <div>
+      <label for="points" class="form-label" id="pointsLabel">points : 0</label>
+      <input type="range" class="form-range" step="1" id="pointsSlider">
     </div>
   </div>
 
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>  
   <script src="/static/js/main.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/14.6.3/nouislider.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/14.6.3/nouislider.min.js"></script>

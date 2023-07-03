@@ -1,15 +1,51 @@
 var socket = io();
 
-var data = [];
+let data;
+
+var timeSlider = document.getElementById("timeSlider");
+var pointsSlider = document.getElementById("pointsSlider");
+var timeLabel = document.getElementById("timeLabel");
+var pointsLabel = document.getElementById("pointsLabel");
+
+timeSlider.min = 0;
+timeSlider.value = 0;
+
+pointsSlider.min = 200;
+pointsSlider.max = 1000;
+pointsSlider.value = 0;
+pointsLabel.innerHTML = "points : " + pointsSlider.value;
 
 socket.on('connect', function () {
   console.log('Connected');
 });
 
+socket.on('metaData', function (data) {
+  timeSlider.max = data.dataLength - 1;
+  socket.emit('get_data', { time: timeSlider.value, points: pointsSlider.value });
+});
+
 socket.on('data', function (_data) {
   data = _data;
+  console.log(data);
+  timeLabel.innerHTML = "heure : " + data[0].timestamp;
+  pointsLabel.innerHTML = "points : " + pointsSlider.value;
   updateChart(data);
 });
+
+
+timeSlider.oninput = function () {
+  updateData();
+}
+
+
+pointsSlider.oninput = function () {
+  updateData();
+}
+
+function updateData() {
+  socket.emit('get_data', { time: timeSlider.value, points: pointsSlider.value });
+}
+
 
 function responsivefy(svg) {
   const container = d3.select(svg.node().parentNode),
@@ -28,6 +64,22 @@ function responsivefy(svg) {
     svg.attr('width', w);
     svg.attr('height', Math.round(w / aspect));
   }
+}
+
+function updateChart(data) {
+  var circles = sVg.selectAll("circle")
+    .data(data);
+
+  circles.enter()
+    .append("circle")
+    .merge(circles)
+    .attr("cx", function (d) { return x(d.x); })
+    .attr("cy", function (d) { return y(d.y); })
+    .attr("r", 1)
+    .attr("fill", "steelblue");
+
+  circles.exit().remove();
+
 }
 
 var margin = { top: 10, right: 10, bottom: 30, left: 40 },
@@ -57,19 +109,3 @@ var y = d3.scaleLinear()
 sVg
   .append('g')
   .call(d3.axisLeft(y));
-
-function updateChart(data) {
-  var circles = sVg.selectAll("circle")
-    .data(data);
-
-  circles.enter()
-    .append("circle")
-    .merge(circles)
-    .attr("cx", function (d) { return x(d.x); })
-    .attr("cy", function (d) { return y(d.y); })
-    .attr("r", 5)
-    .attr("fill", "steelblue");
-
-  circles.exit().remove();
-
-}
