@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Mon Projet</title>
+  <title>Pendule de Foucault HEIG-VD</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.1/socket.io.js"></script>
   <link href="/static/css/style.css" rel="stylesheet">
 </head>
 <body>
@@ -32,13 +34,34 @@
     </div>
   </nav>
 
+
   <div class="container">
-    <h1>Pendule de Foucault à la HEIG-VD</h1>
-    <p>Interface de démonstration</p>
+    <div id="chart"></div>
+    <div class="range_container">
+      <div class="sliders_control">
+          <input id="fromSlider" type="range"/>
+          <input id="toSlider" type="range"/>
+      </div>
+      <div class="form_control">
+          <div class="form_control_container">
+              <!-- <div class="form_control_container__time">Min</div> -->
+              <!-- <input class="form_control_container__time__input" type="time" id="fromInput" value="00:00:00"/> -->
+              <label class="form_control_container__time__input" for="fromInput"></label>
+          </div>
+          <div class="form_control_container">
+              <!-- <div class="form_control_container__time">Max</div> -->
+              <!-- <input class="form_control_container__time__input" type="time" id="toInput" value="23:59:59"/> -->
+              <label class="to_control_container__time__input" for="fromInput"></label>
+          </div>
+      </div>
+    </div>
   </div>
 
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script src="/static/js/main.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/14.6.3/nouislider.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/14.6.3/nouislider.min.js"></script>
 </body>
 </html>
