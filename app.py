@@ -1,8 +1,9 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, Response
 from flask_socketio import SocketIO, join_room, emit
 import csv
 import threading
 import time
+import cv2
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key'
@@ -22,6 +23,26 @@ def get_data():
             timestamp = lines[i].split(',')[2].split(".")[0]
             data.append({'x': x, 'y': y, 'timestamp': timestamp})
     print("data ready")
+
+def generate_frames():
+    # Ouvrir le flux RTSP avec OpenCV
+    cap = cv2.VideoCapture('rtsp://root:pendule2023@192.168.125.206:554/axis-media/media.amp')
+
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            break
+
+        # Convertir l'image en format JPEG pour la diffusion
+        ret, buffer = cv2.imencode('.jpg', frame)
+        frame = buffer.tobytes()
+
+        # Diffuser l'image en tant que flux vidéo
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+
+    # Libérer les ressources après la fin de la diffusion
+    cap.release()
 
 @socketio.on('connect')
 def handle_connect():
@@ -47,6 +68,15 @@ def index():
 @app.route('/mesures')
 def mesures():
     return render_template('mesures.html')
+
+@app.route('/camera')
+def camera():
+    return render_template('camera.html')
+
+@app.route('/video_feed')
+def video_feed():
+    return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
 
 if __name__ == '__main__':
     get_data()

@@ -26,7 +26,7 @@ socket.on('metaData', function (data) {
 
 socket.on('data', function (_data) {
   data = _data;
-  console.log(data);
+  // console.log(data);
   timeLabel.innerHTML = "heure : " + data[0].timestamp;
   pointsLabel.innerHTML = "points : " + pointsSlider.value;
   updateChart(data);
@@ -53,7 +53,7 @@ function responsivefy(svg) {
     height = parseInt(svg.style('height'), 10),
     aspect = width / height;
   svg.attr('viewBox', `0 0 ${width} ${height}`)
-    .attr('preserveAspectRatio', 'xMinYMid')
+    // .attr('preserveAspectRatio', 'xMinYMid')
     .call(resize);
   d3.select(window).on(
     'resize.' + container.attr('id'),
@@ -62,7 +62,8 @@ function responsivefy(svg) {
   function resize() {
     const w = parseInt(container.style('width'));
     svg.attr('width', w);
-    svg.attr('height', Math.round(w / aspect));
+    // svg.attr('height', Math.round(w / aspect));
+    svg.attr('height', Math.round(window.innerHeight * 0.6));
   }
 }
 
@@ -109,3 +110,18 @@ var y = d3.scaleLinear()
 sVg
   .append('g')
   .call(d3.axisLeft(y));
+
+sVg.append("text")
+  .attr("class", "x label")
+  .attr("text-anchor", "end")
+  .attr("x", width)
+  .attr("y", height - 6)
+  .text("axes x mm");
+
+sVg.append("text")
+  .attr("class", "y label")
+  .attr("text-anchor", "end")
+  .attr("y", 6)
+  .attr("dy", ".75em")
+  .attr("transform", "rotate(-90)")
+  .text("axes y mm");
