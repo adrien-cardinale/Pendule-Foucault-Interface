@@ -6,6 +6,7 @@ import time
 import cv2
 from datetime import datetime
 import os
+import eventlet
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key'
@@ -13,7 +14,6 @@ socketio = SocketIO(app)
 
 def get_data(date):
     path = os.path.expanduser('~')+ "/data/"
-    print(date)
     with open(path + 'pFposition-' + date, 'r') as file:
         lines = file.readlines()
         global data
@@ -25,7 +25,6 @@ def get_data(date):
             x = lines[i][9:13]
             y = lines[i][13:18]
             data.append({'x': x, 'y': y, 'timestamp': t})
-    print("data ready")
 
 def generate_frames():
     # Ouvrir le flux RTSP avec OpenCV
@@ -47,7 +46,6 @@ def generate_frames():
     # Libérer les ressources après la fin de la diffusion
     cap.release()
 
-
 def read_data():
     path = os.path.expanduser('~')+ "/data/"
     files = os.listdir(path)
@@ -56,7 +54,6 @@ def read_data():
     for file in files:
         dates.append(file.split("-", 1)[1])
     dates.sort()
-    print(dates)
     get_data(dates[-1])
     while True:
         with open(path + 'pFposition-' + dates[-1], 'r') as file:
@@ -64,7 +61,10 @@ def read_data():
             last_line = lines[-1]
             t = last_line[0:9]
             x = last_line[9:13]
-            y = last_line[13:18]
+            y = last_line[13:17]
+            socketio.emit('data2', [{'x': x, 'y': y, 'timestamp': t}])
+        time.sleep(0.05)
+
 
 @socketio.on('connect')
 def handle_connect():
@@ -107,6 +107,8 @@ def video_feed():
 
 
 if __name__ == '__main__':
-    thread = threading.Thread(target=read_data)
-    thread.start()
+    eventlet.monkey_patch()
+    eventlet.spawn(read_data)
+    # thread = threading.Thread(target=read_data)
+    # thread.start()
     socketio.run(app, host='0.0.0.0')
