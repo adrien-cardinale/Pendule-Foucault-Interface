@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>Caméra</h1>
-
+    <h1>Caméra</h1>
+    <img id="videoFlux" class="rounded mx-auto d-block" src="{{url_for('video_feed')}}" controls autoplay style="max-width: 100vw; max-height: 100vh;"></img>
+    <script src="/static/js/video.js"></script>
 {% endblock %}

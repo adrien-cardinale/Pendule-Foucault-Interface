@@ -4,24 +4,27 @@ import csv
 import threading
 import time
 import cv2
+from datetime import datetime
+import os
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key'
 socketio = SocketIO(app)
 
-def get_data():
-    print("get_data")
-    with open('data.csv', 'r') as file:
+def get_data(date):
+    path = os.path.expanduser('~')+ "/data/"
+    print(date)
+    with open(path + 'pFposition-' + date, 'r') as file:
         lines = file.readlines()
         global data
         data = []
         for i in range(0, len(lines), 4):
             if lines[i] == '\n':
                 continue
-            x = lines[i].split(',')[0]
-            y = lines[i].split(',')[1]
-            timestamp = lines[i].split(',')[2].split(".")[0]
-            data.append({'x': x, 'y': y, 'timestamp': timestamp})
+            t = lines[i][0:9]
+            x = lines[i][9:13]
+            y = lines[i][13:18]
+            data.append({'x': x, 'y': y, 'timestamp': t})
     print("data ready")
 
 def generate_frames():
@@ -44,6 +47,25 @@ def generate_frames():
     # Libérer les ressources après la fin de la diffusion
     cap.release()
 
+
+def read_data():
+    path = os.path.expanduser('~')+ "/data/"
+    files = os.listdir(path)
+    global dates
+    dates = []
+    for file in files:
+        dates.append(file.split("-", 1)[1])
+    dates.sort()
+    print(dates)
+    get_data(dates[-1])
+    while True:
+        with open(path + 'pFposition-' + dates[-1], 'r') as file:
+            lines = file.readlines()
+            last_line = lines[-1]
+            t = last_line[0:9]
+            x = last_line[9:13]
+            y = last_line[13:18]
+
 @socketio.on('connect')
 def handle_connect():
     room_id = request.sid  # Utilisez l'ID de session comme identifiant de la chambre
@@ -54,6 +76,12 @@ def handle_connect():
 def handle_get_data(dataIndex):
     room_id = request.sid
     emit('data', data[int(dataIndex["time"]):int(dataIndex["time"]) + int(dataIndex["points"])], room=room_id)
+
+@socketio.on('change_date')
+def handle_change_date(date):
+    room_id = request.sid
+    get_data(date["date"])
+    emit('metaData', {'dataLength': len(data)}, room=room_id)
 
 @socketio.on('get_labels')
 def handle_get_labels():
@@ -67,11 +95,11 @@ def index():
 
 @app.route('/mesures')
 def mesures():
-    return render_template('mesures.html')
+    return render_template('mesures.html', dates=dates)
 
 @app.route('/camera')
 def camera():
-    return render_template('camera.html')
+    return render_template('camera.html', video_feed='/video_feed')
 
 @app.route('/video_feed')
 def video_feed():
@@ -79,5 +107,6 @@ def video_feed():
 
 
 if __name__ == '__main__':
-    get_data()
-    socketio.run(app, debug=True, host='0.0.0.0')
+    thread = threading.Thread(target=read_data)
+    thread.start()
+    socketio.run(app, host='0.0.0.0')
