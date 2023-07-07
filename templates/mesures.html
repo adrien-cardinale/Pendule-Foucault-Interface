@@ -2,6 +2,14 @@
 {% block content %}
 
 <div class="container">
+<div class="input-group mb-3 m-2">
+  <span class="input-group-text" id="basic-addon1">Amplitude</span>
+  <input type="text" class="form-control" id="amplitude" disabled readonly>
+  <span class="input-group-text" id="basic-addon1">mm</span>
+</div>
+</div>
+
+<div class="container">
   <div class="row">
     <div class="col-md-6">
       <div class="dropdown m-1">
@@ -31,6 +39,9 @@
       <h2><span class="badge bg-secondary badge-sm">Live</span></h2>
       <div class="container" id="chartPositionDirect"></div>
     </div>
+  </div>
+  <div class="row">
+    
   </div>
 </div>
 <script src="/static/js/mesures.js"></script>
