@@ -8,17 +8,22 @@ from datetime import datetime
 import os
 import eventlet
 import numpy as np
-from flask_cors import CORS
-import base64
+import json
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key'
 socketio = SocketIO(app)
 
-xCenter = 1203
-yCenter = 1357
-
 path = os.path.expanduser('~') + "/data/"
+
+
+def load_config():
+    global xCenter
+    global yCenter
+    with open(path + 'configPF.json') as json_file:
+        data = json.load(json_file)
+        xCenter = data['centre']['x']
+        yCenter = data['centre']['y']
 
 
 def get_data(date):
@@ -142,8 +147,8 @@ def camera():
 
 
 if __name__ == '__main__':
+    load_config()
     get_date()
     eventlet.monkey_patch()
     eventlet.spawn(read_data)
-    # eventlet.spawn(generate_frames)
     socketio.run(app, host='0.0.0.0', port=8080)

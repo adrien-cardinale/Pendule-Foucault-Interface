@@ -24,26 +24,28 @@ socket.on('disconnect', function () {
 });
 
 socket.on('metaData_moteur', function (data) {
+  console.log(data);
+  timeSlider.value = 0;
   timeSlider.max = data.dataLength - 1;
   socket.emit('get_data_moteur', { time: timeSlider.value, points: nPoint });
 });
 
 socket.on('data_moteur', function (_data) {
   data = _data;
-  console.log(data[0].timestamp.slice(0,2) + "h " + data[0].timestamp.slice(2,4) + "m " + data[0].timestamp.slice(4,6) + "s ");
+  console.log("data length : " + data.length);
   if(data.length != 0){
     timeLabel.innerHTML = "heure : " + data[0].timestamp.slice(0,2) + "h " + data[0].timestamp.slice(2,4) + "m " + data[0].timestamp.slice(4,6) + "s ";
     updateChart(data);
   }
 });
 
-timeSlider.oninput = function () {
+timeSlider.onchange = function () {
   updateData();
 }
 
 function changeDate(element){
   dateChoice.innerHTML = element.innerHTML;
-  socket.emit('change_date', { date: element.innerHTML });
+  socket.emit('change_date_moteur', { date: element.innerHTML });
 }
 
 function updateData() {
@@ -57,7 +59,6 @@ function responsivefy(svg) {
       height = parseInt(svg.style('height'), 10),
       aspect = width / height;
     svg.attr('viewBox', `0 0 ${width} ${height}`)
-      // .attr('preserveAspectRatio', 'xMinYMid')
       .call(resize);
     d3.select(window).on(
       'resize.' + container.attr('id'),
@@ -66,7 +67,6 @@ function responsivefy(svg) {
     function resize() {
       const w = parseInt(container.style('width'));
       svg.attr('width', w);
-      // svg.attr('height', Math.round(w / aspect));
       svg.attr('height', Math.round(window.innerHeight * 0.6));
     }
 }
@@ -77,7 +77,6 @@ function updateChart(data) {
     sVg.selectAll("*").remove();
 
     var x = d3.scaleLinear()
-      //domain with min and max of data
       .domain([data[0].timestamp, data[data.length - 1].timestamp])
       .range([0, width]);
     sVg
@@ -93,7 +92,7 @@ function updateChart(data) {
       .call(d3.axisLeft(yI));
 
     var yP = d3.scaleLinear()
-      .domain([-0.01, 0.01])
+      .domain([-0.015, 0.015])
       .range([height, 0]);
 
     sVg
@@ -123,13 +122,11 @@ function updateChart(data) {
         .attr("stroke-width", 1.5)
         .attr("d", lineP);
 
-   // Label de l'axe X
     sVg.append("text")
         .attr("transform", "translate(" + (width / 2) + " ," + (height + 40) + ")")
         .style("text-anchor", "middle")
         .text("Temps");
 
-    // Label de l'axe Y (pour les données I)
     sVg.append("text")
         .attr("transform", "rotate(-90)")
         .attr("y", -margin.left)
@@ -139,7 +136,6 @@ function updateChart(data) {
         .text("Courant dans le moteur [A]")
         .attr("fill", colorI);
 
-    // Label de l'axe Y (pour les données P)
     sVg.append("text")
         .attr("transform", "rotate(-90)")
         .attr("y", width + margin.right)
@@ -148,7 +144,6 @@ function updateChart(data) {
         .style("text-anchor", "middle")
         .text("Position du moteur [m]")
         .attr("fill", colorP);
-
 }
 
 var margin = { top: 10, right: 60, bottom: 60, left: 40 },

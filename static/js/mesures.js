@@ -22,6 +22,7 @@ socket.on('disconnect', function () {
 });
 
 socket.on('metaData', function (data) {
+  timeSlider.value = 0;
   timeSlider.max = data.dataLength - 1;
   socket.emit('get_data', { time: timeSlider.value, points: nPoint });
 });
@@ -43,7 +44,7 @@ socket.on('amplitude', function (data) {
   amplitude.value = data.amplitude;
 });
 
-timeSlider.oninput = function () {
+timeSlider.onchange = function () {
   updateData();
 }
 
