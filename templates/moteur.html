@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="dropdown m-1">
+    <button class="btn btn-secondary dropdown-toggle" type="button" id="dateChoice" data-bs-toggle="dropdown" aria-expanded="false">
+      {{dates[-1]}}
+    </button>
+    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+      {%for date in dates%}
+      <li><a class="dropdown-item" onclick="changeDate(this)">{{date}}</a></li>
+      {%endfor%}
+    </ul>
+</div>
+<div id="chartDriver"></div>
+<div class="container" style="max-width: 100vw; max-height: 100vh;">
+    <div class="container" id="chartPosition"></div>
+    <div class="container">
+      <label for="timeSlider" class="form-label" id="timeLabel">heure : 00h 00m 00s</label>
+      <input type="range" class="form-range" step="1" id="timeSlider">
+    </div>
+</div>
+<script src="/static/js/moteur.js"></script>
+{% endblock %}
