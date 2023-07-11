@@ -1,6 +1,24 @@
 {% extends "base.html" %}
 {% block content %}
-    <h1>Caméra</h1>
-    <img id="videoFlux" class="rounded mx-auto d-block" src="{{url_for('video_feed')}}" controls autoplay style="max-width: 100vw; max-height: 100vh;"></img>
-    <script src="/static/js/video.js"></script>
+<!-- <h1>Caméra</h1>
+<video src="http://pendule.einet.ad.eivd.ch:8083/stream/1/channel/0/webrtc" autoplay></video>
+<script src="/static/js/camera.js"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <h1>Affichage d'un flux MSE</h1>
+    <video id="videoElement"></video>
+
+    <script>
+        if (Hls.isSupported()) {
+            const videoElement = document.getElementById('videoElement');
+            const hls = new Hls();
+    
+            hls.loadSource('http://pendule.einet.ad.eivd.ch:8083/stream/b6950692-4049-48d3-80e3-1fbef575c528/channel/0/hlsll/live/index.m3u8');
+            hls.attachMedia(videoElement);
+            hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                videoElement.play();
+            });
+        }
+    </script>
+
+    
 {% endblock %}

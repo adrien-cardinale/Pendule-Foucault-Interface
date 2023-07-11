@@ -8,6 +8,8 @@ from datetime import datetime
 import os
 import eventlet
 import numpy as np
+from flask_cors import CORS
+import base64
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key'
@@ -15,11 +17,11 @@ socketio = SocketIO(app)
 
 xCenter = 1203
 yCenter = 1357
-path = os.path.expanduser('~')+ "/data/"
-files = os.listdir(path)
+
+path = os.path.expanduser('~') + "/data/"
+
 
 def get_data(date):
-    path = os.path.expanduser('~')+ "/data/"
     with open(path + 'pFposition-' + date, 'r') as file:
         lines = file.readlines()
         global data
@@ -32,27 +34,21 @@ def get_data(date):
             y = lines[i][13:18]
             data.append({'x': x, 'y': y, 'timestamp': t})
 
-def generate_frames():
-    # Ouvrir le flux RTSP avec OpenCV
-    cap = cv2.VideoCapture('rtsp://root:pendule2023@192.168.125.206:554/axis-media/media.amp')
 
-    while True:
-        ret, frame = cap.read()
-        if not ret:
-            break
+def get_driver_data(date):
+    global data_moteur
+    data_moteur = []
+    with open(path + 'pFregulateur-' + date, 'r') as file:
+        lines = file.readlines()
+        for i in range(0, len(lines), 4):
+            t = lines[i].split(",")[0]
+            I = lines[i].split(",")[1]
+            p = lines[i].split(",")[2][:-1]
+            data_moteur.append({'I': I, 'p': p, 'timestamp': t})
 
-        # Convertir l'image en format JPEG pour la diffusion
-        ret, buffer = cv2.imencode('.jpg', frame)
-        frame = buffer.tobytes()
-
-        # Diffuser l'image en tant que flux vidéo
-        yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-
-    # Libérer les ressources après la fin de la diffusion
-    cap.release()
 
 def get_date():
+    files = os.listdir(path)
     global dates
     dates = []
     for file in files:
@@ -60,8 +56,10 @@ def get_date():
             dates.append(file.split("-", 1)[1])
     dates.sort()
 
+
 def read_data():
     get_data(dates[-1])
+    get_driver_data(dates[-1])
     amplitude = 0
     while True:
         x = []
@@ -80,29 +78,20 @@ def read_data():
             socketio.emit('amplitude', {'amplitude': amplitude})
         amplitude = int(np.sqrt((np.max(x)-xCenter) ** 2 + (np.max(y)-yCenter) ** 2))
 
-def read_driver_data():
-    data3 = []
-    with open(path + 'pFregulateur-' + dates[-1], 'r') as file:
-        lines = file.readlines()
-        for i in range(0, 1000):
-            t = lines[i].split(",")[0]
-            y = lines[i].split(",")[1]
-            data3.append({'t': t, 'y': y})
-    socketio.emit('data3', data3)
-                
-        
 
 @socketio.on('connect')
 def handle_connect():
-    room_id = request.sid  # Utilisez l'ID de session comme identifiant de la chambre
+    room_id = request.sid
     join_room(room_id)
     emit('metaData', {'dataLength': len(data)}, room=room_id)
-    read_driver_data()
+    emit('metaData_moteur', {'dataLength': len(data_moteur)}, room=room_id)
+
 
 @socketio.on('get_data')
 def handle_get_data(dataIndex):
     room_id = request.sid
     emit('data', data[int(dataIndex["time"]):int(dataIndex["time"]) + int(dataIndex["points"])], room=room_id)
+
 
 @socketio.on('change_date')
 def handle_change_date(date):
@@ -110,40 +99,52 @@ def handle_change_date(date):
     get_data(date["date"])
     emit('metaData', {'dataLength': len(data)}, room=room_id)
 
+
+@socketio.on('get_data_moteur')
+def handle_get_data_moteur(dataIndex):
+    room_id = request.sid
+    print("get_data_moteur")
+    emit('data_moteur', data_moteur[int(dataIndex["time"]):int(dataIndex["time"]) + int(dataIndex["points"])], room=room_id)
+
+
+@socketio.on('change_date_moteur')
+def handle_change_date_moteur(date):
+    room_id = request.sid
+    get_driver_data(date["date"])
+    emit('metaData_moteur', {'dataLength': len(data_moteur)}, room=room_id)
+
+
 @socketio.on('get_labels')
 def handle_get_labels():
     room_id = request.sid
     labels = {"minTime": data[0]['timestamp'], "maxTime": data[-1]['timestamp']}
     emit('labels', labels, room=room_id)
 
+
 @app.route('/')
 def index():
     return render_template('index.html')
+
 
 @app.route('/mesures')
 def mesures():
     get_date()
     return render_template('mesures.html', dates=dates)
 
+
 @app.route('/moteur')
 def moteur():
-    read_driver_data()
-    return render_template('moteur.html')
+    return render_template('moteur.html', dates=dates)
 
 
 @app.route('/camera')
 def camera():
-    return render_template('camera.html', video_feed='/video_feed')
-
-@app.route('/video_feed')
-def video_feed():
-    return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+    return render_template('camera.html')
 
 
 if __name__ == '__main__':
     get_date()
     eventlet.monkey_patch()
     eventlet.spawn(read_data)
-    # thread = threading.Thread(target=read_data)
-    # thread.start()
-    socketio.run(app, host='0.0.0.0')
+    # eventlet.spawn(generate_frames)
+    socketio.run(app, host='0.0.0.0', port=8080)
