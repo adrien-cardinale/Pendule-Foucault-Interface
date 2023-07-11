@@ -1,10 +1,14 @@
 var socket = io();
 
 let data;
+let time;
 
 var timeSlider = document.getElementById("timeSlider");
 var timeLabel = document.getElementById("timeLabel");
 var dateChoice = document.getElementById("dateChoice");
+
+var colorI = 'steelblue'
+var colorP = 'orange'
 
 timeSlider.min = 0;
 timeSlider.value = 0;
@@ -26,10 +30,9 @@ socket.on('metaData_moteur', function (data) {
 
 socket.on('data_moteur', function (_data) {
   data = _data;
-  console.log(data)
+  console.log(data[0].timestamp.slice(0,2) + "h " + data[0].timestamp.slice(2,4) + "m " + data[0].timestamp.slice(4,6) + "s ");
   if(data.length != 0){
     timeLabel.innerHTML = "heure : " + data[0].timestamp.slice(0,2) + "h " + data[0].timestamp.slice(2,4) + "m " + data[0].timestamp.slice(4,6) + "s ";
-    // pointsLabel.innerHTML = "points : " + pointsSlider.value;
     updateChart(data);
   }
 });
@@ -44,7 +47,6 @@ function changeDate(element){
 }
 
 function updateData() {
-  console.log(timeSlider.value);
   socket.emit('get_data_moteur', { time: timeSlider.value, points: nPoint });
 }
 
@@ -67,42 +69,90 @@ function responsivefy(svg) {
       // svg.attr('height', Math.round(w / aspect));
       svg.attr('height', Math.round(window.innerHeight * 0.6));
     }
-  }
+}
+
+    
+
 function updateChart(data) {
-    console.log(data);
     sVg.selectAll("*").remove();
 
     var x = d3.scaleLinear()
       //domain with min and max of data
-      .domain([d3.min(data, function (d) { return d.timestamp; }), d3.max(data, function (d) { return d.timestamp; })])
+      .domain([data[0].timestamp, data[data.length - 1].timestamp])
       .range([0, width]);
     sVg
       .append('g')
       .attr("transform", "translate(0," + height + ")")
       .call(d3.axisBottom(x));
 
-    // X scale and Axis
-    var y = d3.scaleLinear()
+    var yI = d3.scaleLinear()
       .domain([-10, 10])
       .range([height, 0]);
     sVg
       .append('g')
-      .call(d3.axisLeft(y));
-    
-    const line = d3.line()
+      .call(d3.axisLeft(yI));
+
+    var yP = d3.scaleLinear()
+      .domain([-0.01, 0.01])
+      .range([height, 0]);
+
+    sVg
+      .append('g')
+      .attr("transform", "translate(" + width + ",0)")
+      .call(d3.axisRight(yP));
+
+    const lineI = d3.line()
         .x(function (d) { return x(d.timestamp); })
-        .y(function (d) { return y(d.I); });
+        .y(function (d) { return yI(d.I); });
 
     sVg.append("path")
         .datum(data)
         .attr("fill", "none")
-        .attr("stroke", "steelblue")
+        .attr("stroke", colorI)
         .attr("stroke-width", 1.5)
-        .attr("d", line);
+        .attr("d", lineI);
+
+    const lineP = d3.line()
+        .x(function (d) { return x(d.timestamp); })
+        .y(function (d) { return yP(d.p); });
+    
+    sVg.append("path")
+        .datum(data)
+        .attr("fill", "none")
+        .attr("stroke", colorP)
+        .attr("stroke-width", 1.5)
+        .attr("d", lineP);
+
+   // Label de l'axe X
+    sVg.append("text")
+        .attr("transform", "translate(" + (width / 2) + " ," + (height + 40) + ")")
+        .style("text-anchor", "middle")
+        .text("Temps");
+
+    // Label de l'axe Y (pour les données I)
+    sVg.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", -margin.left)
+        .attr("x", -(height / 2))
+        .attr("dy", "1em")
+        .style("text-anchor", "middle")
+        .text("Courant dans le moteur [A]")
+        .attr("fill", colorI);
+
+    // Label de l'axe Y (pour les données P)
+    sVg.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", width + margin.right)
+        .attr("x", -(height / 2))
+        .attr("dy", "1em")
+        .style("text-anchor", "middle")
+        .text("Position du moteur [m]")
+        .attr("fill", colorP);
+
 }
 
-var margin = { top: 10, right: 10, bottom: 30, left: 40 },
-  width = 500 - margin.left - margin.right,
+var margin = { top: 10, right: 60, bottom: 60, left: 40 },
+  width = 800 - margin.left - margin.right,
   height = 400 - margin.top - margin.bottom;
 
 var sVg = d3.select("#chartDriver")
@@ -112,20 +162,3 @@ var sVg = d3.select("#chartDriver")
   .call(responsivefy)
   .append("g")
   .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-
-
-sVg.append("text")
-  .attr("class", "x label")
-  .attr("text-anchor", "end")
-  .attr("x", width)
-  .attr("y", height - 6)
-  .text("axes x mm");
-
-sVg.append("text")
-  .attr("class", "y label")
-  .attr("text-anchor", "end")
-  .attr("y", 6)
-  .attr("dy", ".75em")
-  .attr("transform", "rotate(-90)")
-  .text("axes y mm");

@@ -103,7 +103,6 @@ def handle_change_date(date):
 @socketio.on('get_data_moteur')
 def handle_get_data_moteur(dataIndex):
     room_id = request.sid
-    print("get_data_moteur")
     emit('data_moteur', data_moteur[int(dataIndex["time"]):int(dataIndex["time"]) + int(dataIndex["points"])], room=room_id)
 
 
