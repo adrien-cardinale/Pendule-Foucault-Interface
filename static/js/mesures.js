@@ -7,6 +7,7 @@ var timeLabel = document.getElementById("timeLabel");
 var pointsLabel = document.getElementById("pointsLabel");
 var dateChoice = document.getElementById("dateChoice");
 var amplitude = document.getElementById("amplitude");
+
 var date = "";
 
 timeSlider.min = 0;
@@ -61,7 +62,7 @@ function changeDate(element){
 }
 
 function updateData() {
-  socket.emit('get_data_position', { time: timeSlider.value, date: date});
+  socket.emit('get_data_position', { index: timeSlider.value, date: date});
 }
 
 

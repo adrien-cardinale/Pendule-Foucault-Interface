@@ -7,6 +7,8 @@ var timeSlider = document.getElementById("timeSlider");
 var timeLabel = document.getElementById("timeLabel");
 var dateChoice = document.getElementById("dateChoice");
 
+var d§ate = "";
+
 var colorI = 'steelblue'
 var colorP = 'orange'
 
@@ -45,11 +47,12 @@ timeSlider.onchange = function () {
 
 function changeDate(element){
   dateChoice.innerHTML = element.innerHTML;
-  socket.emit('change_date_moteur', { date: element.innerHTML });
+  date = element.innerHTML;
+  updateData();
 }
 
 function updateData() {
-  socket.emit('get_data_moteur', { time: timeSlider.value, points: nPoint });
+  socket.emit('get_data_moteur', { index: timeSlider.value, date: date });
 }
 
 

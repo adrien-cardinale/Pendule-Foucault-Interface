@@ -21,6 +21,8 @@ path = os.path.expanduser('~') + "/data/"
 def load_config():
     global positionDateLoaded
     positionDateLoaded = ""
+    global moteurDateLoaded
+    moteurDateLoaded = ""
     global xCenter
     global yCenter
     global periode
@@ -105,7 +107,6 @@ def handle_get_data(message):
     global periode
     global positionDateLoaded
     room_id = request.sid
-    print(message)
     if message["date"] == "":
         date = dates[-1]
     else:
@@ -113,30 +114,21 @@ def handle_get_data(message):
     if positionDateLoaded != date:
         get_data(date)
         positionDateLoaded = date
-    for i in range(len(data)):
-        if data[i]["timeMs"] >= int(message["time"]):
-            break
-    emit('data', data[int(message["time"]):int(message["time"])+300], room=room_id)
+    emit('data', data[int(message["index"]):int(message["index"])+300], room=room_id)
 
 
 @socketio.on('get_data_moteur')
-def handle_get_data_moteur(dataIndex):
+def handle_get_data_moteur(message):
     room_id = request.sid
-    emit('data_moteur', data_moteur[int(dataIndex["time"]):int(dataIndex["time"]) + int(dataIndex["points"])], room=room_id)
-
-
-@socketio.on('change_date_moteur')
-def handle_change_date_moteur(date):
-    room_id = request.sid
-    get_driver_data(date["date"])
-    emit('metaData_moteur', {'dataLength': len(data_moteur)}, room=room_id)
-
-
-# @socketio.on('get_labels')
-# def handle_get_labels():
-#     room_id = request.sid
-#     labels = {"minTime": data[0]['timestamp'], "maxTime": data[-1]['timestamp']}
-#     emit('labels', labels, room=room_id)
+    global moteurDateLoaded
+    if message["date"] == "":
+        date = dates[-1]
+    else:
+        date = message["date"]
+    if moteurDateLoaded != date:
+        get_data(date)
+        moteurDateLoaded = date
+    emit('data_moteur', data_moteur[int(message["index"]):int(message["index"])+300], room=room_id)
 
 
 @app.route('/')
