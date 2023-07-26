@@ -17,13 +17,18 @@ socketio = SocketIO(app)
 path = os.path.expanduser('~') + "/data/"
 
 
+
 def load_config():
+    global positionDateLoaded
+    positionDateLoaded = ""
     global xCenter
     global yCenter
+    global periode
     with open(path + 'configPF.json') as json_file:
         data = json.load(json_file)
-        xCenter = data['centre']['x']
-        yCenter = data['centre']['y']
+        xCenter = data['center']['x']
+        yCenter = data['center']['y']
+        periode = data['periode']
 
 
 def get_data(date):
@@ -37,7 +42,8 @@ def get_data(date):
             t = lines[i][0:9]
             x = lines[i][9:13]
             y = lines[i][13:18]
-            data.append({'x': x, 'y': y, 'timestamp': t})
+            timeMs = int(lines[i][0:2]) * 3600000 + int(lines[i][2:4]) * 60000 + int(lines[i][4:6]) * 1000 + int(lines[i][6:9])
+            data.append({'x': x, 'y': y, 'timestamp': t, 'timeMs': timeMs})
 
 
 def get_driver_data(date):
@@ -73,6 +79,8 @@ def read_data():
             with open(path + 'pFposition-' + dates[-1], 'r') as file:
                 lines = file.readlines()
                 last_line = lines[-1]
+                if last_line == '\n':
+                    continue
                 _t = last_line[0:9]
                 _x = last_line[9:13]
                 _y = last_line[13:17]
@@ -92,17 +100,23 @@ def handle_connect():
     emit('metaData_moteur', {'dataLength': len(data_moteur)}, room=room_id)
 
 
-@socketio.on('get_data')
-def handle_get_data(dataIndex):
+@socketio.on('get_data_position')
+def handle_get_data(message):
+    global periode
+    global positionDateLoaded
     room_id = request.sid
-    emit('data', data[int(dataIndex["time"]):int(dataIndex["time"]) + int(dataIndex["points"])], room=room_id)
-
-
-@socketio.on('change_date')
-def handle_change_date(date):
-    room_id = request.sid
-    get_data(date["date"])
-    emit('metaData', {'dataLength': len(data)}, room=room_id)
+    print(message)
+    if message["date"] == "":
+        date = dates[-1]
+    else:
+        date = message["date"]
+    if positionDateLoaded != date:
+        get_data(date)
+        positionDateLoaded = date
+    for i in range(len(data)):
+        if data[i]["timeMs"] >= int(message["time"]):
+            break
+    emit('data', data[int(message["time"]):int(message["time"])+300], room=room_id)
 
 
 @socketio.on('get_data_moteur')
@@ -118,11 +132,11 @@ def handle_change_date_moteur(date):
     emit('metaData_moteur', {'dataLength': len(data_moteur)}, room=room_id)
 
 
-@socketio.on('get_labels')
-def handle_get_labels():
-    room_id = request.sid
-    labels = {"minTime": data[0]['timestamp'], "maxTime": data[-1]['timestamp']}
-    emit('labels', labels, room=room_id)
+# @socketio.on('get_labels')
+# def handle_get_labels():
+#     room_id = request.sid
+#     labels = {"minTime": data[0]['timestamp'], "maxTime": data[-1]['timestamp']}
+#     emit('labels', labels, room=room_id)
 
 
 @app.route('/')
@@ -130,7 +144,7 @@ def index():
     return render_template('index.html')
 
 
-@app.route('/mesures')
+@app.route('/position')
 def mesures():
     get_date()
     return render_template('mesures.html', dates=dates)
@@ -151,4 +165,4 @@ if __name__ == '__main__':
     get_date()
     eventlet.monkey_patch()
     eventlet.spawn(read_data)
-    socketio.run(app, host='0.0.0.0', port=8080)
+    socketio.run(app, host='0.0.0.0', port=8080, debug=True)

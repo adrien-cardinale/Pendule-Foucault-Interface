@@ -1,42 +1,45 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="row row-cols-1 row-cols-md-2 g-4 m-5">
-    <div class="col">
-      <div class="card h-100">
+
+
+<div class="container mt-5">
+  <h1>Pendule de Foucault à la HEIG-VD</h1>
+  <p>
+    Depuis 1995 la HEIG-VD est équipée d'un pendule de Foucault maintenue par une excitation paramètrique.
+  </p>
+</div>
+
+<div class="card-group mt-5">
+      <div class="card" style="width: 25rem;">
         <img src="/static/images/plotPosition.png" class="card-img-top" alt="...">
         <div class="card-body">
           <h5 class="card-title">Position</h5>
-          <p class="card-text">Mouvement du pendule au fils de la journée.</p>
-          <a href="/mesures" class="btn btn-primary">Mesures</a>
+          <p class="card-text">Mesure de position de la spère du pendule au fils de la journée.</p>
+          <a href="/position" class="btn btn-primary">Mesures</a>
         </div>
         <!-- <div class="card-footer">
           <small class="text-muted">Last updated 3 mins ago</small>
         </div> -->
       </div>
-    </div>
-    <div class="col">
-      <div class="card h-100">
+      <div class="card" style="width: 25rem;">
+        <img src="/static/images/video.png" class="card-img-top" alt="...">
+        <div class="card-body">
+          <h5 class="card-title">Mesure moteur</h5>
+          <p class="card-text">Mesures effectuées sur le régulateur des moteurs servant à maintenir l'excitation du pendule</p>
+          <a href="/moteurs" class="btn btn-primary">Moteurs</a>
+        </div>
+      </div>
+      <div class="card" style="width: 25rem;">
         <img src="/static/images/video.png" class="card-img-top" alt="...">
         <div class="card-body">
           <h5 class="card-title">Vue du mécanisme</h5>
           <p class="card-text">Flux vidéo de la vue du mécanisme d'entretient du pendule.</p>
+          <a href="/camera" class="btn btn-primary">Caméra</a>
         </div>
         <!-- <div class="card-footer">
           <small class="text-muted">Last updated 3 mins ago</small>
         </div> -->
       </div>
-    <!-- </div>
-    <div class="col">
-      <div class="card h-100">
-        <img src="..." class="card-img-top" alt="...">
-        <div class="card-body">
-          <h5 class="card-title">Card title</h5>
-          <p class="card-text">This is a wider card with supporting text below as a natural lead-in to additional content. This card has even longer content than the first to show that equal height action.</p>
-        </div>
-        <div class="card-footer">
-          <small class="text-muted">Last updated 3 mins ago</small>
-        </div>
-      </div>
-    </div> -->
+    
   </div>
 {% endblock %}

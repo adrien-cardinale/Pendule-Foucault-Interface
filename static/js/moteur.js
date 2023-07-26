@@ -26,7 +26,7 @@ socket.on('disconnect', function () {
 socket.on('metaData_moteur', function (data) {
   console.log(data);
   timeSlider.value = 0;
-  timeSlider.max = data.dataLength - 1;
+  timeSlider.max = data.dataLength - nPoint;
   socket.emit('get_data_moteur', { time: timeSlider.value, points: nPoint });
 });
 
