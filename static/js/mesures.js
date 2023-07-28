@@ -10,7 +10,6 @@ var amplitude = document.getElementById("amplitude");
 var spinner = document.getElementById("spinner");
 
 
-
 var date = "";
 
 timeSlider.min = 0;
@@ -19,7 +18,6 @@ timeSlider.value = 0;
 var nPoint = 200;
 
 socket.on('connect', function () {
-  spinner.style.visibility = "hidden";
   console.log('Connected');
 });
 
@@ -29,7 +27,6 @@ socket.on('disconnect', function () {
 });
 
 socket.on('metaData', function (data) {
-  
   timeSlider.value = 0;
   timeSlider.max = data.dataLength - nPoint;
   updateData();
@@ -38,7 +35,10 @@ socket.on('metaData', function (data) {
 socket.on('data', function (_data) {
   data = _data;
   if(data.length != 0){
-    timeLabel.innerHTML = "heure : " + data[0].timestamp.slice(0,2) + "h " + data[0].timestamp.slice(2,4) + "m " + data[0].timestamp.slice(4,6) + "s à" + data[data.length - 1].timestamp.slice(0,2) + "h " + data[data.length - 1].timestamp.slice(2,4) + "m " + data[data.length - 1].timestamp.slice(4,6) + "s";
+    timeLabel.innerHTML = "heure : " + data[0].timestamp.slice(0,2) + "h " + 
+    data[0].timestamp.slice(2,4) + "m " + data[0].timestamp.slice(4,6) + "s à" + 
+    data[data.length - 1].timestamp.slice(0,2) + "h " + data[data.length - 1].timestamp.slice(2,4) + 
+    "m " + data[data.length - 1].timestamp.slice(4,6) + "s";
     updateChart(data);
   }
   spinner.style.visibility = "hidden";
@@ -81,7 +81,6 @@ function responsivefy(svg) {
     height = parseInt(svg.style('height'), 10),
     aspect = width / height;
   svg.attr('viewBox', `0 0 ${width} ${height}`)
-    // .attr('preserveAspectRatio', 'xMinYMid')
     .call(resize);
   d3.select(window).on(
     'resize.' + container.attr('id'),
@@ -90,7 +89,6 @@ function responsivefy(svg) {
   function resize() {
     const w = parseInt(container.style('width'));
     svg.attr('width', w);
-    // svg.attr('height', Math.round(w / aspect));
     svg.attr('height', Math.round(window.innerHeight * 0.6));
   }
 }
@@ -147,7 +145,6 @@ sVg
   .attr("transform", "translate(0," + height + ")")
   .call(d3.axisBottom(x));
 
-// X scale and Axis
 var y = d3.scaleLinear()
   .domain([100, 2500])
   .range([height, 0]);

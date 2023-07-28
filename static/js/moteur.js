@@ -25,7 +25,6 @@ timeSlider.value = 0;
 var nPoint = 200;
 
 socket.on('connect', function () {
-  spinner.style.visibility = "hidden";
     console.log('Connected');
 });
 

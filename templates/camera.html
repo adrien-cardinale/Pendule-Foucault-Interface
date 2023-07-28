@@ -1,24 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
-<!-- <h1>Caméra</h1>
-<video src="http://pendule.einet.ad.eivd.ch:8083/stream/1/channel/0/webrtc" autoplay></video>
-<script src="/static/js/camera.js"></script> -->
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <h1>Vue du mécanisme</h1>
-    <video id="videoElement" autoplay class="mx-auto"></video>
+    <video muted="muted" id="videoElement" autoplay class="mx-auto"></video>
 
-    <script>
-        if (Hls.isSupported()) {
-            const videoElement = document.getElementById('videoElement');
-            const hls = new Hls();
-    
-            hls.loadSource('http://pendule.iai-heig-vd.in:8083/stream/0ca1a15b-077f-4141-8730-acb91cc1f71d/channel/0/hls/live/index.m3u8');
-            hls.attachMedia(videoElement);
-            hls.on(Hls.Events.MANIFEST_PARSED, function() {
-                videoElement.play();
-            });
-        }
-    </script>
-
-    
+    <script src="/static/js/camera.js"></script>
 {% endblock %}

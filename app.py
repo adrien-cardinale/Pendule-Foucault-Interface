@@ -1,24 +1,18 @@
-from flask import Flask, render_template, request, Response
+from flask import Flask, render_template, request
 from flask_socketio import SocketIO, join_room, emit
-import csv
-import threading
 import time
-import cv2
-from datetime import datetime
 import os
 import eventlet
 import numpy as np
 import json
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'your-secret-key'
 socketio = SocketIO(app)
 
 path = os.path.expanduser('~') + "/data/"
 
 global amplitude
 amplitude = 0
-
 
 
 def load_config():
