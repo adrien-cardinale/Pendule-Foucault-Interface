@@ -5,13 +5,19 @@
 <div class="container mt-5">
   <h1>Pendule de Foucault à la HEIG-VD</h1>
   <p>
-    Depuis 1995 la HEIG-VD est équipée d'un pendule de Foucault maintenue par une excitation paramètrique.
+    Depuis 1995 la HEIG-VD dispose d'un pendule de Foucault entretenu, aménagé au sein de la tour, au centre de la cage d'escalier et dont les oscillations sont visibles depuis le hall.
+    <br><br>
+    À l'époque, il avait été choisi d'entretenir le mouvement du pendule en soulevant son point de suspension pour lui fournir de l'énergie afin de compenser les pertes par frottement. Le déplacement était effectué par un moteur DC et une crémaillère qui soulevaient le point de suspension au moment du passage au centre de la sphère, qui était détecté  à l'aide d'un aimant placé dans la sphère et d'une bobine placée au centre de la zone d'oscillation.
+    <br><br>
+    Dans cette nouvelle version, la crémaillère et le moteur DC ont été remplacés par des moteurs linéaires et la position de la sphère est maintenant détectée par vision avec une caméra. Ce qui permet aussi d'enregistrer la position de la sphère pour analyse.
+    <br><br>
+    Cette interface web permet de visualiser les mesures de postion de la sphère et de l'excitation avec les moteurs linéaires.
   </p>
 </div>
 
-<div class="card-group mt-5">
+<div class="card-group mt-5 mb-5">
       <div class="card" style="width: 25rem;">
-        <img src="/static/images/plotPosition.png" class="card-img-top" alt="...">
+        <img src="/static/images/plotPosition.png" class="card-img-top img-fluid" alt="...">
         <div class="card-body">
           <h5 class="card-title">Position</h5>
           <p class="card-text">Mesure de position de la spère du pendule au fils de la journée.</p>
@@ -22,7 +28,7 @@
         </div> -->
       </div>
       <div class="card" style="width: 25rem;">
-        <img src="/static/images/video.png" class="card-img-top" alt="...">
+        <img src="/static/images/moteur.png" class="card-img-top img-fluid" alt="..." style="margin-top: 16%; margin-bottom: 16%;">
         <div class="card-body">
           <h5 class="card-title">Mesure moteur</h5>
           <p class="card-text">Mesures effectuées sur le régulateur des moteurs servant à maintenir l'excitation du pendule</p>
@@ -30,7 +36,7 @@
         </div>
       </div>
       <div class="card" style="width: 25rem;">
-        <img src="/static/images/video.png" class="card-img-top" alt="...">
+        <img src="/static/images/video.png" class="card-img-top img-fluid" alt="..." style="margin-top: 1%; margin-bottom: 2%;" >
         <div class="card-body">
           <h5 class="card-title">Vue du mécanisme</h5>
           <p class="card-text">Flux vidéo de la vue du mécanisme d'entretient du pendule.</p>

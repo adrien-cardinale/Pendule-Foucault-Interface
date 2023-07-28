@@ -1,10 +1,25 @@
 {% extends "base.html" %}
 {% block content %}
 
+<h1>Position et courant dans les moteurs</h1>
+
+<div class="container">
+  <div class="input-group mb-3 m-2">
+    <span class="input-group-text" id="basic-addon1">Courant</span>
+    <span class="input-group-text" id="basic-addon1">Minimum</span>
+    <input type="text" class="form-control" id="minCurrent" readonly>
+    <span class="input-group-text" id="basic-addon1">[A]</span>
+    <span class="input-group-text" id="basic-addon1">Maximum</span>
+    <input type="text" class="form-control" id="maxCurrent" readonly>
+    <span class="input-group-text" id="basic-addon1">[A]</span>
+  </div>
+  </div>
+
 <div class="dropdown m-1">
     <button class="btn btn-secondary dropdown-toggle" type="button" id="dateChoice" data-bs-toggle="dropdown" aria-expanded="false">
       {{dates[-1]}}
     </button>
+    <span class="spinner-border spinner-border-sm" aria-hidden="true" id="spinner"></span>
     <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
       {%for date in dates%}
       <li><a class="dropdown-item" onclick="changeDate(this)">{{date}}</a></li>

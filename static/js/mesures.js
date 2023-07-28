@@ -7,6 +7,9 @@ var timeLabel = document.getElementById("timeLabel");
 var pointsLabel = document.getElementById("pointsLabel");
 var dateChoice = document.getElementById("dateChoice");
 var amplitude = document.getElementById("amplitude");
+var spinner = document.getElementById("spinner");
+
+
 
 var date = "";
 
@@ -16,14 +19,17 @@ timeSlider.value = 0;
 var nPoint = 200;
 
 socket.on('connect', function () {
+  spinner.style.visibility = "hidden";
   console.log('Connected');
 });
 
 socket.on('disconnect', function () {
+  spinner.style.visibility = "visible";
   console.log('Disconnected');
 });
 
 socket.on('metaData', function (data) {
+  
   timeSlider.value = 0;
   timeSlider.max = data.dataLength - nPoint;
   updateData();
@@ -32,10 +38,10 @@ socket.on('metaData', function (data) {
 socket.on('data', function (_data) {
   data = _data;
   if(data.length != 0){
-    timeLabel.innerHTML = "heure : " + data[0].timestamp.slice(0,2) + "h " + data[0].timestamp.slice(2,4) + "m " + data[0].timestamp.slice(4,6) + "s ";
-    // pointsLabel.innerHTML = "points : " + pointsSlider.value;
+    timeLabel.innerHTML = "heure : " + data[0].timestamp.slice(0,2) + "h " + data[0].timestamp.slice(2,4) + "m " + data[0].timestamp.slice(4,6) + "s à" + data[data.length - 1].timestamp.slice(0,2) + "h " + data[data.length - 1].timestamp.slice(2,4) + "m " + data[data.length - 1].timestamp.slice(4,6) + "s";
     updateChart(data);
   }
+  spinner.style.visibility = "hidden";
 });
 
 socket.on('data2', function (data) {
@@ -56,6 +62,9 @@ nPoint.oninput = function () {
 }
 
 function changeDate(element){
+  spinner.style.visibility = "visible";
+  console.log(element.innerHTML);
+  socket.emit('change_date', element.innerHTML);
   dateChoice.innerHTML = element.innerHTML;
   date = element.innerHTML;
   updateData();

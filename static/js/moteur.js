@@ -6,11 +6,18 @@ let time;
 var timeSlider = document.getElementById("timeSlider");
 var timeLabel = document.getElementById("timeLabel");
 var dateChoice = document.getElementById("dateChoice");
+var minCurrent = document.getElementById("minCurrent");
+var maxCurrent = document.getElementById("maxCurrent");
+var spinner = document.getElementById("spinner");
 
-var d§ate = "";
+
+var date = "";
 
 var colorI = 'steelblue'
 var colorP = 'orange'
+
+var numericP;
+var numericI;
 
 timeSlider.min = 0;
 timeSlider.value = 0;
@@ -18,25 +25,33 @@ timeSlider.value = 0;
 var nPoint = 200;
 
 socket.on('connect', function () {
+  spinner.style.visibility = "hidden";
     console.log('Connected');
 });
 
 socket.on('disconnect', function () {
+  spinner.style.visibility = "visible";
   console.log('Disconnected');
 });
 
 socket.on('metaData_moteur', function (data) {
+  
   console.log(data);
   timeSlider.value = 0;
   timeSlider.max = data.dataLength - nPoint;
-  socket.emit('get_data_moteur', { time: timeSlider.value, points: nPoint });
+  updateData();
 });
 
 socket.on('data_moteur', function (_data) {
+  spinner.style.visibility = "hidden";
   data = _data;
   console.log("data length : " + data.length);
+  numericP = data.map(item => parseFloat(item.p));
+  numericI = data.map(item => parseFloat(item.I));
+  minCurrent.value = Math.min(...numericI).toFixed(2);
+  maxCurrent.value = Math.max(...numericI).toFixed(2);
   if(data.length != 0){
-    timeLabel.innerHTML = "heure : " + data[0].timestamp.slice(0,2) + "h " + data[0].timestamp.slice(2,4) + "m " + data[0].timestamp.slice(4,6) + "s ";
+    timeLabel.innerHTML = "heure : " + data[0].timestamp.slice(0,2) + "h " + data[0].timestamp.slice(2,4) + "m " + data[0].timestamp.slice(4,6) + "s à " + data[data.length - 1].timestamp.slice(0,2) + "h " + data[data.length - 1].timestamp.slice(2,4) + "m " + data[data.length - 1].timestamp.slice(4,6) + "s ";
     updateChart(data);
   }
 });
@@ -46,6 +61,8 @@ timeSlider.onchange = function () {
 }
 
 function changeDate(element){
+  spinner.style.visibility = "visible";
+  socket.emit('change_date_moteur', element.innerHTML);
   dateChoice.innerHTML = element.innerHTML;
   date = element.innerHTML;
   updateData();
@@ -74,28 +91,36 @@ function responsivefy(svg) {
     }
 }
 
-    
+var formatTime = d3.timeFormat("%S");    
 
 function updateChart(data) {
-    sVg.selectAll("*").remove();
 
-    var x = d3.scaleLinear()
-      .domain([data[0].timestamp, data[data.length - 1].timestamp])
-      .range([0, width]);
-    sVg
-      .append('g')
-      .attr("transform", "translate(0," + height + ")")
-      .call(d3.axisBottom(x));
+    sVg.selectAll("*").remove();
+    data.forEach(function(d) {
+      var hour = +d.timestamp.slice(0,2);
+      var minute = +d.timestamp.slice(2,4);
+      var second = +d.timestamp.slice(4,6);
+      var millisecond = +d.timestamp.slice(6,9);
+      d.timestamp = new Date(1970, 0, 1, hour, minute, second, millisecond);
+    });
+
+    var x = d3.scaleTime() 
+    .domain(d3.extent(data, function(d) { return d.timestamp; }))
+    .range([0, width]);
+
+  sVg.append("g")
+    .attr("transform", "translate(0," + height + ")")
+    .call(d3.axisBottom(x).tickFormat(formatTime));
 
     var yI = d3.scaleLinear()
-      .domain([-10, 10])
+      .domain([Math.min(...numericI), Math.max(...numericI)])
       .range([height, 0]);
     sVg
       .append('g')
       .call(d3.axisLeft(yI));
 
     var yP = d3.scaleLinear()
-      .domain([-0.015, 0.015])
+      .domain([Math.min(...numericP), Math.max(...numericP)])
       .range([height, 0]);
 
     sVg
@@ -128,7 +153,7 @@ function updateChart(data) {
     sVg.append("text")
         .attr("transform", "translate(" + (width / 2) + " ," + (height + 40) + ")")
         .style("text-anchor", "middle")
-        .text("Temps");
+        .text("Temps [s]");
 
     sVg.append("text")
         .attr("transform", "rotate(-90)")

@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
 
+<h1>Position de la sphère du pendule</h1>
+
 <div class="container">
 <div class="input-group mb-3 m-2">
   <span class="input-group-text" id="basic-addon1">Amplitude</span>
@@ -9,19 +11,22 @@
 </div>
 </div>
 
-<div class="container">
+<div class="container mb-5">
   <div class="row">
     <div class="col-md-6">
+      <h2>Historique de la position sur une période d'oscillation du pendule</h2>
       <div class="dropdown m-1">
         <button class="btn btn-secondary dropdown-toggle" type="button" id="dateChoice" data-bs-toggle="dropdown" aria-expanded="false">
           {{dates[-1]}}
         </button>
+        <span class="spinner-border spinner-border-sm" aria-hidden="true" id="spinner"></span>
         <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
           {%for date in dates%}
           <li><a class="dropdown-item" onclick="changeDate(this)">{{date}}</a></li>
           {%endfor%}
         </ul>
       </div>
+      
     
       <div class="container" style="max-width: 100vw; max-height: 100vh;">
           <div class="container" id="chartPosition"></div>
@@ -36,6 +41,7 @@
       </div>
     </div>
     <div class="col-md-6">
+      <h2>Position en temps réel<br><br></h2>
       <h2><span class="badge bg-secondary badge-sm">Live</span></h2>
       <div class="container" id="chartPositionDirect"></div>
     </div>

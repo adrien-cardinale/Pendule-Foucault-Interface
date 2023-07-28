@@ -16,6 +16,9 @@ socketio = SocketIO(app)
 
 path = os.path.expanduser('~') + "/data/"
 
+global amplitude
+amplitude = 0
+
 
 
 def load_config():
@@ -53,11 +56,12 @@ def get_driver_data(date):
     data_moteur = []
     with open(path + 'pFregulateur-' + date, 'r') as file:
         lines = file.readlines()
-        for i in range(0, len(lines), 4):
+        for i in range(0, len(lines), 2):
             t = lines[i].split(",")[0]
             I = lines[i].split(",")[1]
             p = lines[i].split(",")[2][:-1]
-            data_moteur.append({'I': I, 'p': p, 'timestamp': t})
+            timeMs = int(lines[i][0:2]) * 3600000 + int(lines[i][2:4]) * 60000 + int(lines[i][4:6]) * 1000 + int(lines[i][6:9])
+            data_moteur.append({'I': I, 'p': p, 'timestamp': t, "timeMs": timeMs})
 
 
 def get_date():
@@ -73,7 +77,7 @@ def get_date():
 def read_data():
     get_data(dates[-1])
     get_driver_data(dates[-1])
-    amplitude = 0
+    global amplitude
     while True:
         x = []
         y = []
@@ -96,10 +100,12 @@ def read_data():
 
 @socketio.on('connect')
 def handle_connect():
+    global amplitude
     room_id = request.sid
     join_room(room_id)
     emit('metaData', {'dataLength': len(data)}, room=room_id)
     emit('metaData_moteur', {'dataLength': len(data_moteur)}, room=room_id)
+    socketio.emit('amplitude', {'amplitude': amplitude})
 
 
 @socketio.on('get_data_position')
@@ -116,6 +122,11 @@ def handle_get_data(message):
         positionDateLoaded = date
     emit('data', data[int(message["index"]):int(message["index"])+300], room=room_id)
 
+@socketio.on('change_date')
+def handle_change_date(message):
+    get_data(message)
+    emit('metaData', {'dataLength': len(data)}, room=request.sid)
+
 
 @socketio.on('get_data_moteur')
 def handle_get_data_moteur(message):
@@ -126,9 +137,15 @@ def handle_get_data_moteur(message):
     else:
         date = message["date"]
     if moteurDateLoaded != date:
-        get_data(date)
+        get_driver_data(date)
         moteurDateLoaded = date
-    emit('data_moteur', data_moteur[int(message["index"]):int(message["index"])+300], room=room_id)
+    emit('data_moteur', data_moteur[int(message["index"]):int(message["index"])+60], room=room_id)
+
+
+@socketio.on('change_date_moteur')
+def handle_change_date_moteur(message):
+    get_driver_data(message)
+    emit('metaData_moteur', {'dataLength': len(data_moteur)}, room=request.sid)
 
 
 @app.route('/')
