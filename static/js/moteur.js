@@ -10,6 +10,9 @@ var minCurrent = document.getElementById("minCurrent");
 var maxCurrent = document.getElementById("maxCurrent");
 var spinner = document.getElementById("spinner");
 
+var margin = { top: 10, right: 80, bottom: 60, left: 60 },
+  width = 800 - margin.left - margin.right,
+  height = 400 - margin.top - margin.bottom;
 
 var date = "";
 
@@ -165,7 +168,7 @@ function updateChart(data) {
 
     sVg.append("text")
         .attr("transform", "rotate(-90)")
-        .attr("y", width + margin.right)
+        .attr("y", width+margin.right/2)
         .attr("x", -(height / 2))
         .attr("dy", "1em")
         .style("text-anchor", "middle")
@@ -173,9 +176,7 @@ function updateChart(data) {
         .attr("fill", colorP);
 }
 
-var margin = { top: 10, right: 60, bottom: 60, left: 40 },
-  width = 800 - margin.left - margin.right,
-  height = 400 - margin.top - margin.bottom;
+
 
 var sVg = d3.select("#chartDriver")
   .append("svg")
